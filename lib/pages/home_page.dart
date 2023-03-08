@@ -2,6 +2,7 @@ import 'package:codigo6_weatherapp/models/location_weather_model.dart';
 import 'package:codigo6_weatherapp/services/api_service.dart';
 import 'package:codigo6_weatherapp/widgets/item_forecast_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,10 +20,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    getData("Lima");
+    getDataLocation();
   }
 
-  getData(String cityName) async {
+  Future<void> getData(String cityName) async {
     ApiService apiService = ApiService();
     isLoading = true;
     setState(() {});
@@ -44,6 +45,22 @@ class _HomePageState extends State<HomePage> {
       );
     } else {
       locationWeatherModelTemp = locationWeatherModel;
+      _cityController.clear();
+      isLoading = false;
+      setState(() {});
+    }
+  }
+
+  getDataLocation() async {
+    ApiService apiService = ApiService();
+    isLoading = true;
+    setState(() {});
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    locationWeatherModel = await apiService.getWeatherDataLocation(
+        position.latitude, position.longitude);
+    if (locationWeatherModel != null) {
+      locationWeatherModelTemp = locationWeatherModel;
       isLoading = false;
       setState(() {});
     }
@@ -59,6 +76,16 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              getDataLocation();
+            },
+            icon: Icon(
+              Icons.location_on,
+            ),
+          ),
+        ],
       ),
       body: !isLoading && locationWeatherModel != null
           ? SingleChildScrollView(
