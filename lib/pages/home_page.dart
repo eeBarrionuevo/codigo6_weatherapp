@@ -10,6 +10,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   LocationWeatherModel? locationWeatherModel;
+  LocationWeatherModel? locationWeatherModelTemp;
   final TextEditingController _cityController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
@@ -26,7 +27,23 @@ class _HomePageState extends State<HomePage> {
     isLoading = true;
     setState(() {});
     locationWeatherModel = await apiService.getWeatherData(cityName);
-    if (locationWeatherModel != null) {
+    if (locationWeatherModel == null) {
+      locationWeatherModel = locationWeatherModelTemp;
+      isLoading = false;
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.0),
+          ),
+          content:
+              Text("Hubo un inconveniente, por favor inténta con otra ciudad."),
+        ),
+      );
+    } else {
+      locationWeatherModelTemp = locationWeatherModel;
       isLoading = false;
       setState(() {});
     }
@@ -111,6 +128,14 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          errorBorder: OutlineInputBorder(
                             borderSide: BorderSide.none,
                             borderRadius: BorderRadius.circular(16.0),
                           ),
